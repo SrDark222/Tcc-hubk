@@ -1,118 +1,190 @@
-local GuiLib = {}
+-- LIB GUI PROFISSA - TCC HUBZIN DO DK 🥷🏼
+-- By DK & ChatGPT 🔥 2025
 
-function GuiLib:CreateWindow(title)
-	local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-	ScreenGui.Name = "DKZIN_HUB"
-
-	local Main = Instance.new("Frame", ScreenGui)
-	Main.Name = "Main"
-	Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	Main.Size = UDim2.new(0, 500, 0, 320)
-	Main.Position = UDim2.new(0.5, -250, 0.5, -160)
-	Main.AnchorPoint = Vector2.new(0.5, 0.5)
-	Main.BorderSizePixel = 0
-	Main.Active = true
-	Main.Draggable = true
-
-	local MainCorner = Instance.new("UICorner", Main)
-	MainCorner.CornerRadius = UDim.new(0, 14)
-
-	local TopBar = Instance.new("Frame", Main)
-	TopBar.Size = UDim2.new(1, 0, 0, 35)
-	TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 14)
-
-	local Title = Instance.new("TextLabel", TopBar)
-	Title.Text = title or "🔥 DKZIN HUB"
-	Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Title.BackgroundTransparency = 1
-	Title.Size = UDim2.new(1, -40, 1, 0)
-	Title.Position = UDim2.new(0, 10, 0, 0)
-	Title.TextXAlignment = Enum.TextXAlignment.Left
-	Title.Font = Enum.Font.GothamBold
-	Title.TextSize = 14
-
-	local MinBtn = Instance.new("TextButton", TopBar)
-	MinBtn.Text = "-"
-	MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	MinBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	MinBtn.Size = UDim2.new(0, 30, 1, 0)
-	MinBtn.Position = UDim2.new(1, -30, 0, 0)
-	MinBtn.Font = Enum.Font.GothamBold
-	MinBtn.TextSize = 18
-	Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 8)
-
-	local TabButtons = Instance.new("Frame", Main)
-	TabButtons.Size = UDim2.new(0, 120, 1, -35)
-	TabButtons.Position = UDim2.new(0, 0, 0, 35)
-	TabButtons.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-
-	local TabList = Instance.new("UIListLayout", TabButtons)
-	TabList.Padding = UDim.new(0, 5)
-	TabList.SortOrder = Enum.SortOrder.LayoutOrder
-
-	local TabPages = Instance.new("Frame", Main)
-	TabPages.Name = "Pages"
-	TabPages.Size = UDim2.new(1, -120, 1, -35)
-	TabPages.Position = UDim2.new(0, 120, 0, 35)
-	TabPages.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-
-	local Tabs = {}
-
-	function Tabs:CreateTab(tabName)
-		local Btn = Instance.new("TextButton", TabButtons)
-		Btn.Text = tabName
-		Btn.Size = UDim2.new(1, -10, 0, 30)
-		Btn.Position = UDim2.new(0, 5, 0, 0)
-		Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-		Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Btn.Font = Enum.Font.Gotham
-		Btn.TextSize = 13
-		Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
-
-		local Page = Instance.new("Frame", TabPages)
-		Page.Size = UDim2.new(1, 0, 1, 0)
-		Page.Visible = false
-		Page.Name = tabName
-		Page.BackgroundTransparency = 1
-
-		local ElementList = Instance.new("UIListLayout", Page)
-		ElementList.Padding = UDim.new(0, 6)
-
-		Btn.MouseButton1Click:Connect(function()
-			for _, tab in pairs(TabPages:GetChildren()) do
-				if tab:IsA("Frame") then tab.Visible = false end
-			end
-			Page.Visible = true
-		end)
-
-		local API = {}
-
-		function API:AddButton(text, callback)
-			local btn = Instance.new("TextButton", Page)
-			btn.Size = UDim2.new(1, -10, 0, 30)
-			btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-			btn.Text = text
-			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			btn.Font = Enum.Font.Gotham
-			btn.TextSize = 14
-			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-
-			btn.MouseButton1Click:Connect(function()
-				if callback then callback() end
-			end)
-		end
-
-		return API
-	end
-
-	local minimized = false
-	MinBtn.MouseButton1Click:Connect(function()
-		minimized = not minimized
-		Main.Visible = not minimized
-	end)
-
-	return Tabs
+-- Singleton: só 1 GUI por execução
+if getgenv().TCC_HubGui then
+    getgenv().TCC_HubGui:Destroy()
+    getgenv().TCC_HubGui = nil
 end
 
-return GuiLib
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
+-- Root GUI
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "TCC_HubGui"
+Gui.ResetOnSpawn = false
+Gui.IgnoreGuiInset = true
+Gui.Parent = game:GetService("CoreGui")
+getgenv().TCC_HubGui = Gui
+
+-- Floater icon (minimized)
+local floatIcon = Instance.new("ImageButton")
+floatIcon.Name = "FloatIcon"
+floatIcon.Image = "rbxassetid://3926305904"
+floatIcon.BackgroundTransparency = 1
+floatIcon.Size = UDim2.new(0,50,0,50)
+floatIcon.Position = UDim2.new(0,10,0.5,-25)
+floatIcon.Visible = false
+floatIcon.Parent = Gui
+
+-- Main Window
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0,500,0,500)
+mainFrame.Position = UDim2.new(0.5,-250,0.5,-250)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+mainFrame.Parent = Gui
+
+-- Title Bar
+local titleBar = Instance.new("TextLabel", mainFrame)
+titleBar.Size = UDim2.new(1,0,0,40)
+titleBar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+titleBar.TextColor3 = Color3.new(1,1,1)
+titleBar.Font = Enum.Font.GothamBold
+titleBar.TextSize = 20
+titleBar.TextXAlignment = Enum.TextXAlignment.Left
+titleBar.Text = "   🥋 TCC HUBZIN"
+titleBar.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Close (minimize) button
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size = UDim2.new(0,40,0,40)
+closeBtn.Position = UDim2.new(1,-40,0,0)
+closeBtn.Text = "✖"
+closeBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+closeBtn.TextColor3 = Color3.new(1,0,0)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 20
+
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    floatIcon.Visible = true
+end)
+
+floatIcon.MouseButton1Click:Connect(function()
+    mainFrame.Visible = true
+    floatIcon.Visible = false
+end)
+
+-- Make window draggable
+local dragging, dragStart, startPos
+titleBar.InputBegan:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = inp.Position
+        startPos = mainFrame.Position
+        inp.Changed:Connect(function()
+            if inp.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+titleBar.InputChanged:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseMovement then
+        dragging = true
+    end
+end)
+RunService.RenderStepped:Connect(function()
+    if dragging then
+        local delta = UIS:GetMouseLocation() - dragStart
+        mainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Contents (Scrolling)
+local scroll = Instance.new("ScrollingFrame", mainFrame)
+scroll.Position = UDim2.new(0,0,0,40)
+scroll.Size = UDim2.new(1,0,1,-40)
+scroll.CanvasSize = UDim2.new(0,0,1000)
+scroll.ScrollBarThickness = 6
+scroll.BackgroundTransparency = 1
+local list = Instance.new("UIListLayout", scroll)
+list.Padding = UDim.new(0,10)
+list.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Element-adding functions
+local function AddSection(t) local l=Instance.new("TextLabel",scroll)
+l.Size=UDim2.new(1,-20,0,30); l.Text=t; l.Font=Enum.Font.GothamBold; l.TextSize=20; l.TextColor3=Color3.new(1,1,1)
+l.BackgroundTransparency=1 end
+
+local function AddButton(t,cb)local b=Instance.new("TextButton",scroll)
+b.Size=UDim2.new(1,-20,0,40);b.Text=t;b.Font=Enum.Font.GothamBold;b.TextSize=18;b.BackgroundColor3=Color3.fromRGB(60,60,60)
+b.TextColor3=Color3.new(1,1,1); b.MouseButton1Click:Connect(cb) end
+
+local function AddToggle(t,init,cb)local st=init
+local o=Instance.new("TextButton",scroll)
+o.Size=UDim2.new(1,-20,0,40)
+o.Text="["..(st and "ON" or "OFF").."] "..t
+o.Font=Enum.Font.Gotham;o.TextSize=16;o.BackgroundColor3=Color3.fromRGB(40,40,40)
+o.TextColor3=Color3.new(1,1,1)
+o.MouseButton1Click:Connect(function() st=not st; o.Text="["..(st and "ON" or "OFF").."] "..t; pcall(cb,st) end) end
+
+local function AddInput(ph,cb)local tb=Instance.new("TextBox",scroll)
+tb.Size=UDim2.new(1,-20,0,35);tb.PlaceholderText=ph;tb.Text="";tb.Font=Enum.Font.Gotham
+tb.TextSize=16;tb.BackgroundColor3=Color3.fromRGB(50,50,50);tb.TextColor3=Color3.new(1,1,1)
+tb.FocusLost:Connect(function() pcall(cb,tb.Text) end) end
+
+local function AddDropdown(t,opts,cb)local d=Instance.new("TextButton",scroll)
+d.Size=UDim2.new(1,-20,0,40);d.Text=t.." ▼";d.Font=Enum.Font.GothamBold;d.TextSize=16
+d.BackgroundColor3=Color3.fromRGB(40,40,40);d.TextColor3=Color3.new(1,1,1)
+d.MouseButton1Click:Connect(function()
+  for i,v in ipairs(opts) do
+    local it=Instance.new("TextButton",scroll)
+    it.Size=UDim2.new(1,-40,0,30);it.Text=" - "..v;it.Font=Enum.Font.Gotham;it.TextSize=14
+    it.BackgroundColor3=Color3.fromRGB(30,30,30);it.TextColor3=Color3.new(1,1,1)
+    it.MouseButton1Click:Connect(function() pcall(cb,v); it:Destroy() end)
+  end
+end) end
+
+local function AddSlider(n,mn,mx,cb)local l=Instance.new("TextLabel",scroll)
+l.Size=UDim2.new(1,-20,0,20); l.Text=n.." ("..mn.."-"..mx..")"; l.TextColor3=Color3.new(1,1,1)
+l.BackgroundTransparency=1; l.Font=Enum.Font.Gotham; l.TextSize=14
+local s=Instance.new("TextBox",scroll)
+s.Size=UDim2.new(1,-20,0,30); s.Text=tostring(mn); s.Font=Enum.Font.Gotham; s.TextSize=16
+s.BackgroundColor3=Color3.fromRGB(50,50,50); s.TextColor3=Color3.new(1,1,1)
+s.FocusLost:Connect(function()
+  local v=tonumber(s.Text)
+  if v then v=math.clamp(v,mn,mx); pcall(cb,v) end
+end) end
+
+local function AddImage(asset)local i=Instance.new("ImageLabel",scroll)
+i.Size=UDim2.new(0,200,0,200); i.Image="rbxassetid://"..tostring(asset)
+i.BackgroundTransparency=1 end
+
+local function AddParagraph(txt)local p=Instance.new("TextLabel",scroll)
+p.Size=UDim2.new(1,-20,0,60); p.TextWrapped=true; p.Text=txt
+p.Font=Enum.Font.Gotham; p.TextSize=14; p.TextColor3=Color3.new(1,1,1)
+p.BackgroundTransparency=1 end
+
+local function AddInvite(url)local i=Instance.new("TextButton",scroll)
+i.Size=UDim2.new(1,-20,0,40); i.Text="🔗 Invite"
+i.Font=Enum.Font.GothamBold; i.TextSize=18
+i.BackgroundColor3=Color3.fromRGB(60,60,60)
+i.TextColor3=Color3.new(1,1,1)
+i.MouseButton1Click:Connect(function()
+  pcall(function() setclipboard(url) end)
+end) end
+
+local function AddSession(cb)local l=Instance.new("TextLabel",scroll)
+l.Size=UDim2.new(1,-20,0,30); l.Text="Session: "..tostring(game.JobId)
+l.Font=Enum.Font.Gotham; l.TextSize=16; l.TextColor3=Color3.new(1,1,1)
+l.BackgroundTransparency=1 end
+
+return {
+ CreateSection=AddSection,
+ CreateButton=AddButton,
+ CreateToggle=AddToggle,
+ CreateInput=AddInput,
+ CreateDropdown=AddDropdown,
+ CreateSlider=AddSlider,
+ CreateImage=AddImage,
+ CreateParagraph=AddParagraph,
+ CreateInvite=AddInvite,
+ CreateSession=AddSession
+}
